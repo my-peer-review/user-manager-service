@@ -34,7 +34,7 @@ async def login_endpoint(credentials: UserLogin, repo: UserRepoDep):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token, exp_ts, iat_ts = AuthService.create_access_token(
-        {"sub": user.username, "role": user.role}
+        {"sub": user.userId, "role": user.role}
     )
     return Token(
         access_token=token,
