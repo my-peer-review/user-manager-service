@@ -2,8 +2,8 @@ pipeline {
   agent { label 'unit-test' }
 
   environment {
-    CI_IMAGE_NAME   = 'assignments-pytest'
-    APP_IMAGE_NAME  = 'ale175/service-assignment'
+    CI_IMAGE_NAME   = 'user-manager-pytest'
+    APP_IMAGE_NAME  = 'ale175/service-user-manager'
     DOCKERHUB_CREDS = 'dockerhub-creds'
     INTEGRATION_JOB = 'peer-review-pipeline/integration-repo/main' // <— ADATTA a come si chiama da te
   }

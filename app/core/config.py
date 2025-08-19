@@ -11,7 +11,8 @@ class Settings(BaseSettings):
     jwt_private_key: str  # contiene direttamente la chiave
 
     # Postgres
-    postgres_dsn: str     # es: "postgresql+asyncpg://user:pass@host:5432/dbname"
+    mongo_uri: str
+    mongo_db_name: str
 
     class Config:
         env_file = None  # solo ENV vars

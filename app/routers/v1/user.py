@@ -1,6 +1,6 @@
 # app/routers/v1/user.py
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.responses import JSONResponse
 
 from app.schemas.user import UserCreate, UserLogin, User, Token
@@ -13,7 +13,6 @@ router = APIRouter()
 
 # DI solo per il repo (come richiesto)
 UserRepoDep = Annotated[UserRepo, Depends(get_user_repository)]
-
 
 @router.post("/user/register", status_code=status.HTTP_201_CREATED)
 async def register_endpoint(payload: UserCreate, repo: UserRepoDep):
@@ -43,6 +42,25 @@ async def login_endpoint(credentials: UserLogin, repo: UserRepoDep):
         expires_at=exp_ts,
         issued_at=iat_ts,
     )
+    
+# ADMIN 
+
+@router.delete("/user/{username}",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user_endpoint(
+    username: str,
+    repo: UserRepoDep,
+    current_user: User = Depends(AuthService.current_user),
+):
+    # Solo admin o lo stesso utente possono cancellare
+    if current_user.role != "admin" and current_user.username != username:
+        raise HTTPException(status_code=403, detail="Not authorized to delete this user")
+
+    deleted = await repo.delete_by_username(username)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 
 @router.get("/user/me", response_model=User)
