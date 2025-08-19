@@ -53,7 +53,7 @@ pipeline {
                 wait: true,                // <— aspetta che finisca
                 propagate: true,           // <— se fallisce, fallisce anche questa pipeline
                 parameters: [
-                  string(name: 'SERVICE_NAME', value: 'assignment'),
+                  string(name: 'SERVICE_NAME', value: 'user-manager'),
                   string(name: 'TRIGGER_TYPE', value: 'single')
                 ]
         }
