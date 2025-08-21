@@ -2,10 +2,10 @@ pipeline {
   agent { label 'unit-test' }
 
   environment {
-    CI_IMAGE_NAME   = 'assignments-pytest'
-    APP_IMAGE_NAME  = 'ale175/service-assignment'
+    CI_IMAGE_NAME   = 'user-manager-pytest'
+    APP_IMAGE_NAME  = 'ale175/service-user-manager'
     DOCKERHUB_CREDS = 'dockerhub-creds'
-    INTEGRATION_JOB = 'peer-review-pipeline/integration-repo/main' // <— ADATTA a come si chiama da te
+    INTEGRATION_JOB = 'peer-review-pipeline/integration-repo/main'
   }
 
   stages {
@@ -50,10 +50,10 @@ pipeline {
         script {
           // Attendi il job di integrazione e propaga lo stato:
           build job: INTEGRATION_JOB,
-                wait: true,                // <— aspetta che finisca
-                propagate: true,           // <— se fallisce, fallisce anche questa pipeline
+                wait: true,              
+                propagate: true,        
                 parameters: [
-                  string(name: 'SERVICE_NAME', value: 'assignment'),
+                  string(name: 'SERVICE_NAME', value: 'user-manager'),
                   string(name: 'TRIGGER_TYPE', value: 'single')
                 ]
         }

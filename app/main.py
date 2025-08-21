@@ -2,31 +2,23 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import create_async_engine
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.core.config import settings
-from app.database.postgres_user import PostgresUserRepository
+from app.database.mongo_user import MongoUserRepository
 from app.routers.v1 import health
 from app.routers.v1 import user
 
 def create_app() -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        # Engine async PostgreSQL (richiede asyncpg installato)
-        engine = create_async_engine(
-            settings.postgres_dsn,  # es: "postgresql+asyncpg://user:pass@user-db:5432/userdb"
-            pool_pre_ping=True,
-        )
-
-        # Repository utenti e bootstrap schema (in produzione usa Alembic)
-        user_repo = PostgresUserRepository(engine)
-        await user_repo.ensure_schema()
-        app.state.user_repo = user_repo  # usato da get_user_repository()
-
-        try:
-            yield
-        finally:
-            await engine.dispose()
+        client = AsyncIOMotorClient(settings.mongo_uri, uuidRepresentation="standard")
+        db = client[settings.mongo_db_name]
+        repo = MongoUserRepository(db)
+        await repo.ensure_indexes()
+        app.state.user_repo = repo       # <-- usato da get_repository()
+        yield
+        client.close()
 
     app = FastAPI(
         title="User Manager Microservice",

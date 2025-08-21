@@ -36,3 +36,8 @@ class UserRepo(ABC):
     async def get_auth_by_email(self, email: str) -> Optional[Tuple[User, str]]:
         """Ritorna (User, hashed_password) per email, oppure None."""
         raise NotImplementedError
+    
+    @abstractmethod
+    async def delete_by_username(self, username: str) -> bool:
+        """Cancella l'utente per username. Ritorna True se cancellato, False se non esiste."""
+        raise NotImplementedError

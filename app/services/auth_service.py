@@ -2,16 +2,20 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Annotated
 
 import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.core.config import settings
+from app.core.deps import get_user_repository
+from app.database.user_repo import UserRepo
 from app.schemas.user import User
+from app.services.user_service import UserService
 
-# Estrazione Bearer token in stile FastAPI (usabile dentro dipendenze)
+
+UserRepoDep = Annotated[UserRepo, Depends(get_user_repository)]
 _security = HTTPBearer(auto_error=True)
 
 
@@ -21,9 +25,7 @@ class AuthService:
     def _now() -> datetime:
         return datetime.now(timezone.utc)
 
-    # -------------------------
-    #       CREATE TOKEN
-    # -------------------------
+
     @staticmethod
     def create_access_token(
         claims: Dict[str, Any],
@@ -53,9 +55,7 @@ class AuthService:
 
         return token, exp_ts, iat_ts
 
-    # -------------------------
-    #        DECODE TOKEN
-    # -------------------------
+
     @staticmethod
     def decode_token(token: str) -> Dict[str, Any]:
         try:
@@ -69,26 +69,26 @@ class AuthService:
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-    # -------------------------
-    #     FASTAPI DEPENDENCY
-    # -------------------------
+
     @staticmethod
     async def current_user(
         credentials: HTTPAuthorizationCredentials = Depends(_security),
     ) -> User:
-        """
-        Dipendenza da usare nei router: valida il JWT e
-        ritorna un `User` minimale (ID sconosciuto dal solo token).
-        """
+
         payload = AuthService.decode_token(credentials.credentials)
         sub = payload.get("sub")
         role = payload.get("role")
         if not sub or not role:
             raise HTTPException(status_code=401, detail="Invalid token payload")
+        
+        User = UserService.get_user_by_id(sub, repo=Depends(UserRepo))
+
+        if not User:
+            raise HTTPException(status_code=404, detail="User not found")
 
         # Non abbiamo l'ID numerico nel token: lo lasciamo a -1 (come placeholder).
         # Se vuoi l'ID reale, nel router /me puoi caricarlo dal DB usando lo username (sub).
-        return User(userId=-1, username=substr(sub), email=None, role=role)
+        return User
 
 # --- piccolo helper opzionale (evita whitespace strani) ---
 def substr(s: str) -> str:

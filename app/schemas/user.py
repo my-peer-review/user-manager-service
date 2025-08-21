@@ -16,7 +16,7 @@ class UserLogin(BaseModel):
 
 # Per rispondere al client con dati pubblici dell'utente
 class User(BaseModel):
-    userId: int
+    userId: str
     username: str
     email: Optional[str] = None
     role: str

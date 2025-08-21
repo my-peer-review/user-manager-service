@@ -7,7 +7,6 @@ import bcrypt
 from app.schemas.user import UserCreate, UserLogin, User
 from app.database.user_repo import UserRepo
 
-
 # --- helpers pw ---
 def _hash_password(plain: str) -> str:
     return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -79,3 +78,9 @@ class UserService:
             return None
 
         return user
+    
+    async def get_user_by_id(user_id: str, repo: UserRepo) -> Optional[User]:
+        """
+        Ritorna l'utente per ID, oppure None se non esiste.
+        """
+        return await repo.get_by_id(user_id)    
