@@ -1,12 +1,14 @@
 from datetime import datetime, timezone
 from typing import Optional, Tuple
-from uuid import uuid4
-
 from motor.motor_asyncio import AsyncIOMotorDatabase
+import random
 
 from app.database.user_repo import UserRepo
 from app.schemas.user import UserCreate, User
 
+def create_user_id() -> str:
+    # genera un numero tra 10000 e 99999
+    return f"us-{random.randint(00000, 99999)}"
 
 class MongoUserRepository(UserRepo):
     """Implementazione MongoDB del repository utenti.
@@ -48,7 +50,7 @@ class MongoUserRepository(UserRepo):
     # CRUD
     # ----------------------
     async def create(self, data: UserCreate, *, hashed_password: str) -> str:
-        new_id = str(uuid4())
+        new_id = create_user_id()
         await self.col.insert_one(self._to_doc(new_id, data, hashed_password))
         return new_id
 
