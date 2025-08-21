@@ -7,8 +7,7 @@ from app.database.user_repo import UserRepo
 from app.schemas.user import UserCreate, User
 
 def create_user_id() -> str:
-    # genera un numero tra 10000 e 99999
-    return f"us-{random.randint(00000, 99999)}"
+    return f"as-{random.randint(0, 99999):05d}"
 
 class MongoUserRepository(UserRepo):
     """Implementazione MongoDB del repository utenti.
