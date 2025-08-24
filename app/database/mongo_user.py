@@ -79,7 +79,6 @@ class MongoUserRepository(UserRepo):
     # Indexes ("schema")
     # ----------------------
     async def ensure_indexes(self):
-        # Unicità per username e email (se presenti)
         await self.col.create_index("username", unique=True, name="uq_users_username")
         await self.col.create_index("email", unique=True, sparse=True, name="uq_users_email")
         await self.col.create_index("userId", unique=True, name="uq_users_userId")
